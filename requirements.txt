@@ -1,0 +1,11 @@
+certifi==2023.11.17
+charset-normalizer==3.3.2
+cinemagoer==2023.5.1
+idna==3.6
+lxml==5.0.0
+rel==0.4.9.5
+requests==2.31.0
+SQLAlchemy==2.0.25
+typing_extensions==4.9.0
+urllib3==2.1.0
+websocket-client==1.7.0

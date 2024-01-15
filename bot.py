@@ -37,9 +37,11 @@ def on_message(ws: websocket.WebSocketApp, message):
     # initiate match
     elif message == "3probe":
         ws.send('5')
-        ws.send(f'42["find-match",{{"daycount":21,"username":"{username}","wins":0,"startingMovieInput":"{first_play}","startingMovieId":{first_play_id},"staging":false,"battleStats":{{"todayWins":0,"todayDraws":0,"todayLosses":0,"todayCurrentStreak":0,"todayBestStreak":0,"todayLongestBattle":0,"allTimeBestStreak":0,"allTimeLongestBattle":0,"wins":0,"draws":0,"losses":0,"daycount":21}}}}]')
+        ws.send(f'42["find-match",{{"daycount":22,"username":"{username}","wins":0,"startingMovieInput":"{first_play}","startingMovieId":{first_play_id},"staging":false,"battleStats":{{"todayWins":0,"todayDraws":0,"todayLosses":0,"todayCurrentStreak":0,"todayBestStreak":0,"todayLongestBattle":0,"allTimeBestStreak":0,"allTimeLongestBattle":0,"wins":0,"draws":0,"losses":0,"daycount":22}}}}]')
         
         print(f'Searching for match... First play: {first_play} ID: {first_play_id}')
+        with open("log.txt", "a") as log:
+            log.write(f'Searching for match... First play: {first_play} ID: {first_play_id}\n')
 
     # main message handler
     elif message[:2] == "42":
@@ -58,9 +60,12 @@ def on_message(ws: websocket.WebSocketApp, message):
 
             print(f'Game found. Starting movie: {current_movie} ({current_year}) ID: {current_id}')
             print(f'We are player {player_number}. It is{"" if our_turn else " not"} our turn.')
+            with open("log.txt", "a") as log:
+                log.write(f'Game found. Starting movie: {current_movie} ({current_year}) ID: {current_id}\n')
+                log.write(f'We are player {player_number}. It is{"" if our_turn else " not"} our turn.\n')
 
         # play first if we need to
-        elif protocol == "start-game" and our_turn:
+        elif protocol == "start-game" and our_turn:    # implement a thing to make sure you dont guess a duplicate
             cur_movie = ia.get_movie(ia.search_movie(f'{current_movie} ({current_year})', results=1)[0].getID())
             cast = cur_movie["cast"]
             dictFilmography = ia.get_person(cast[0].getID())['filmography']
@@ -78,6 +83,8 @@ def on_message(ws: websocket.WebSocketApp, message):
             ws.send(f'42["submit-movie",{{"gameId":"{gameId}","username":"{username}","input":"{next_movie["title"]} ({next_movie["year"]})","currentMovieId":{current_id},"currentMovieTitle":"{current_movie}","currentMovieYear":"{current_year}"}}]')
 
             print(f'Submitted {next_movie["title"]} ({next_movie["year"]}) against {current_movie} ({current_year}) ID: {current_id}')
+            with open("log.txt", "a") as log:
+                log.write(f'Submitted {next_movie["title"]} ({next_movie["year"]}) against {current_movie} ({current_year}) ID: {current_id}\n')
 
         # respond to plays
         elif protocol == "update-game":
@@ -85,9 +92,15 @@ def on_message(ws: websocket.WebSocketApp, message):
             if data["gameData"]["playerTurn"] != player_number:
                 our_turn = False
                 print(f'\nSuccessful connection using {data["newMovie"]["title"]}! Actor connections: {", ".join(data["connections"])}\n')
+                with open("log.txt", "a") as log:
+                    log.write(f'\nSuccessful connection using {data["newMovie"]["title"]}! Actor connections: {", ".join(data["connections"])}\n\n')
             
             # enemy submission was successful
             else:
+                print(f'Opponent successful connection using {data["newMovie"]["title"]}! Actor connections: {", ".join(data["connections"])}')
+                with open("log.txt", "a") as log:
+                    log.write(f'Opponent successful connection using {data["newMovie"]["title"]}! Actor connections: {", ".join(data["connections"])}\n')
+
                 our_turn = True
                 filmography.clear()
                 current_movie = data["newMovie"]["title"][:-7]
@@ -117,6 +130,8 @@ def on_message(ws: websocket.WebSocketApp, message):
                 ws.send(f'42["submit-movie",{{"gameId":"{gameId}","username":"{username}","input":"{next_movie["title"]} ({next_movie["year"]})","currentMovieId":{current_id},"currentMovieTitle":"{current_movie}","currentMovieYear":"{current_year}"}}]')
 
                 print(f'Submitted {next_movie["title"]} ({next_movie["year"]}) against {current_movie} ({current_year}) ID: {current_id}')
+                with open("log.txt", "a") as log:
+                    log.write(f'Submitted {next_movie["title"]} ({next_movie["year"]}) against {current_movie} ({current_year}) ID: {current_id}\n')
 
 
         # handle errors from us
@@ -129,6 +144,9 @@ def on_message(ws: websocket.WebSocketApp, message):
 
                     print(f'{"Above movie was not in database, trying new movie" if data["message"] == "This movie is not in our database" else "Above movie has no links to current movie, trying new movie"}')
                     print(f'Submitted {next_movie["title"]} ({next_movie["year"]}) against {current_movie} ({current_year}) ID: {current_id}')
+                    with open("log.txt", "a") as log:
+                        log.write(f'{"Above movie was not in database, trying new movie" if data["message"] == "This movie is not in our database" else "Above movie has no links to current movie, trying new movie"}\n')
+                        log.write(f'Submitted {next_movie["title"]} ({next_movie["year"]}) against {current_movie} ({current_year}) ID: {current_id}\n')
 
                 # no more movies from the actor, get the next actor
                 else:
@@ -143,13 +161,31 @@ def on_message(ws: websocket.WebSocketApp, message):
 
                     print("Actor movies exhausted, moving to next")
                     print(f'Submitted {next_movie["title"]} ({next_movie["year"]}) against {current_movie} ({current_year}) ID: {current_id}')
+                    with open("log.txt", "a") as log:
+                        log.write("Actor movies exhausted, moving to next\n")
+                        log.write(f'Submitted {next_movie["title"]} ({next_movie["year"]}) against {current_movie} ({current_year}) ID: {current_id}\n')
             
             # catch all uncaught errors
             else:
                 print(f'Uncaught error. Header: {data["header"]} Message: {data["message"]}')
+                with open("log.txt", "a") as log:
+                    log.write(f'Uncaught error. Header: {data["header"]} Message: {data["message"]}\n')
         
+        # game end
+        elif protocol == "game-over":
+            if int(data["gameData"]["winner"]) == player_number:
+                print("Game over, we won!")
+                with open("log.txt", "a") as log:
+                    log.write("Game over, we won!\n")
+            else:
+                print("We lost? Investigate.")
+                with open("log.txt", "a") as log:
+                    log.write("We lost? Investigate.\n")
+
         else:
             print(f'Uncaught protocol: {protocol} with data: {data}')
+            with open("log.txt", "a") as log:
+                log.write(f'Uncaught protocol: {protocol} with data: {data}\n')
 
 
 def on_error(ws, error):
@@ -165,6 +201,8 @@ def on_open(ws: websocket.WebSocketApp):
 
 if __name__ == "__main__":
     # websocket.enableTrace(True)
+    with open("log.txt", "w") as log:
+        pass
 
     # get session id
     r = requests.get("https://www.cinenerdle2.app/socket.io/?EIO=4&transport=polling&t=OpILxx1")

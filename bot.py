@@ -18,8 +18,10 @@ filmography = set()
 player_number = 0
 our_turn = False
 
-# currently are possible errors with adding movies to filmography and no movies end up getting added due to everything having been played
-# also does not account for bans yet
+# KNOWN ISSUES
+# currently are possible errors with adding movies to filmography and no movies end up getting added due to everything having been played (because it is unlikely to happen)
+# also does not account for bans yet (because I have not run into it yet so I don't know what the message data/protocol looks like)
+# cinemagoer read operation can time-out though is not likely
 
 def on_message(ws: websocket.WebSocketApp, message):
     global ia

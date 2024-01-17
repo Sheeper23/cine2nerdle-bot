@@ -3,6 +3,7 @@ import rel
 import requests
 import json
 import imdb
+import time
 
 ia = imdb.Cinemagoer()
 username = "cashmeoutside20243546768"
@@ -59,6 +60,7 @@ def on_message(ws: websocket.WebSocketApp, message):
             current_year = data["films"][0]["title"][-5:-1]
             current_id = data["films"][0]["id"]
             ws.send(f'42["join-game-room",{{"gameId":"{gameId}"}}]')
+            time.sleep(1)
             ws.send(f'42["ready-up",{{"gameId":"{gameId}","username":"{username}","bans":["matt damon","tom bower","sophie monk"],"playersData":"{data["playersData"]}"}}]')
 
             print(f'Game found. Starting movie: {current_movie} ({current_year}) ID: {current_id}')
@@ -81,7 +83,7 @@ def on_message(ws: websocket.WebSocketApp, message):
                 for movie in dictFilmography[role]:
                     try:
                         if f'{current_movie} ({current_year})' == f'{movie["title"]} ({movie["year"]})':
-                            continue
+                            raise Exception("movie played")
                         filmography.add(movie)
                     except:
                         pass
@@ -135,7 +137,7 @@ def on_message(ws: websocket.WebSocketApp, message):
                         try:
                             for film in data["gameData"]["films"]:
                                 if film["title"] == f'{movie["title"]} ({movie["year"]})':
-                                    continue
+                                    raise Exception("movie played")
                             filmography.add(movie)
                         except:
                             pass
@@ -177,7 +179,7 @@ def on_message(ws: websocket.WebSocketApp, message):
                             try:
                                 for film in data["gameData"]["films"]:
                                     if film["title"] == f'{movie["title"]} ({movie["year"]})':
-                                        continue
+                                        raise Exception("movie played")
                                 filmography.add(movie)
                             except:
                                 pass

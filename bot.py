@@ -43,7 +43,7 @@ def on_message(ws: websocket.WebSocketApp, message):
     # initiate match
     elif message == "3probe":
         ws.send('5')
-        ws.send(f'42["find-match",{{"daycount":32,"username":"{username}","wins":0,"startingMovieInput":"{first_play}","startingMovieId":{first_play_id},"staging":false,"battleStats":{{"todayWins":0,"todayDraws":0,"todayLosses":0,"todayCurrentStreak":0,"todayBestStreak":0,"todayLongestBattle":0,"allTimeBestStreak":0,"allTimeLongestBattle":0,"wins":0,"draws":0,"losses":0,"daycount":22}}}}]')
+        ws.send(f'42["find-match",{{"daycount":33,"username":"{username}","wins":0,"startingMovieInput":"{first_play}","startingMovieId":{first_play_id},"staging":false,"battleStats":{{"todayWins":0,"todayDraws":0,"todayLosses":0,"todayCurrentStreak":0,"todayBestStreak":0,"todayLongestBattle":0,"allTimeBestStreak":0,"allTimeLongestBattle":0,"wins":0,"draws":0,"losses":0,"daycount":22}}}}]')
         
         print(f'Searching for match... First play: {first_play} ID: {first_play_id}')
         with open("log.txt", "a") as log:

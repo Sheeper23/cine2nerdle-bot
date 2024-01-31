@@ -199,6 +199,25 @@ def on_message(ws: websocket.WebSocketApp, message):
                 with open("log.txt", "a") as log:
                     log.write(f'Uncaught error. Header: {data["header"]} Message: {data["message"]}\n')
         
+        # errors from our opponent
+        elif protocol == "error" and not our_turn:
+            if data["message"] == "No links were found to this movie":
+                print(f'Opponent failed with guess {data["header"]}')
+                with open("log.txt", "a") as log:
+                    log.write(f'Opponent failed with guess {data["header"]}\n')
+
+        # opponent casted
+        elif protocol == "cast-lifeline-response" and not our_turn:
+            print(f'Opponent used CAST lifeline')
+            with open("log.txt", "a") as log:
+                    log.write(f'Opponent used CAST lifeline\n')
+
+        # opponent used time
+        elif protocol == "add-time" and not our_turn:
+            print(f'Opponent used TIME lifeline')
+            with open("log.txt", "a") as log:
+                    log.write(f'Opponent used TIME lifeline\n')
+
         # game end
         elif protocol == "game-over":
             if int(data["gameData"]["winner"]) == player_number:
@@ -210,6 +229,25 @@ def on_message(ws: websocket.WebSocketApp, message):
                 with open("log.txt", "a") as log:
                     log.write("We lost? Investigate.\n")
 
+        # time synced
+        elif protocol == "sync-time":
+            print(f'Time synced with server')
+            with open("log.txt", "a"):
+                log.write(f'Time synced with server\n')
+        
+        # player readied
+        elif protocol == "players-ready":
+            print(f'We are ready')
+            with open("log.txt", "a"):
+                log.write(f'We are ready\n')
+
+        # opponent disconnected
+        elif protocol == "opponent-disconnected":
+            print(f'Opponent disconnected, yay!')
+            with open("log.txt", "a"):
+                log.write(f'Opponent disconnected, yay!\n')
+        
+        # catch all uncaught protocols
         else:
             print(f'Uncaught protocol: {protocol} with data: {data}')
             with open("log.txt", "a") as log:
